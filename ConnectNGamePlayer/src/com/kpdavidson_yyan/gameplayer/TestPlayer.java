@@ -24,6 +24,8 @@ public class TestPlayer {
 	static int numcolumns;
 	static int winlength; //number of pieces in a row to win
 	static int timelimit;
+	static boolean wePopped;
+	static boolean theyPopped;
 	
 	public boolean processInput() throws IOException{	
 	
@@ -38,9 +40,11 @@ public class TestPlayer {
 			}
 			else {
 				makePopMove(Integer.parseInt(ls.get(0)));
+				theyPopped = true;
 			}
 			
-			//run makemove
+			//run getBestMove
+			//make the move
 		}
 		else if(ls.size()==1){
 			System.out.println("game over!!!");
@@ -60,9 +64,12 @@ public class TestPlayer {
 		gameboard = new int[numrows][numcolumns];
 		winlength = Integer.parseInt(ls.get(2));
 		timelimit = Integer.parseInt(ls.get(4));
+		wePopped = false;
+		theyPopped = false;
 		
 		if(Integer.parseInt(ls.get(3)) == 1) {
-			//TODO make move
+			//TODO run getBestMove
+			//make move
 		}
 	}
 	

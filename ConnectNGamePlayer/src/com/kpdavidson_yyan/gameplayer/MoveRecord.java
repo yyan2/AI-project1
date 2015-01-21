@@ -8,10 +8,10 @@ public class MoveRecord {
 		this.movetype = movetype;
 		this.value = null;
 	}
-	Integer player;
-	Integer column;
-	Integer movetype;
-	Double value;
+	private Integer player;
+	private Integer column;
+	private Integer movetype;
+	private Double value;
 	
 	public Integer getPlayer() {
 		return player;
