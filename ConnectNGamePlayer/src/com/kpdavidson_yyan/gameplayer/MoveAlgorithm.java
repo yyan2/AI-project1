@@ -25,13 +25,15 @@ public class MoveAlgorithm {
 				}
 			}
 		}
+		Double bestValue = -99999.9;
 		for(MoveRecord r : possibleMoves) {
 			if(TestPlayer.wePopped) {
-				EvaluateMove(r, TestPlayer.gameboard, 1, 2, true, TestPlayer.theyPopped);
+				EvaluateMove(r, TestPlayer.gameboard, 1, 2, true, TestPlayer.theyPopped, bestValue);
 			}
 			else {
-				EvaluateMove(r, TestPlayer.gameboard, 1, 2, false, TestPlayer.theyPopped);
+				EvaluateMove(r, TestPlayer.gameboard, 1, 2, false, TestPlayer.theyPopped, bestValue);
 			}
+			if(r.getValue() > bestValue) bestValue = r.getValue();
 		}
 		
 		// choose move with highest value
@@ -47,7 +49,8 @@ public class MoveAlgorithm {
 		return bestmove;
 	}
 	
-	private static void EvaluateMove(MoveRecord desiredMove, int[][] gboard, int lastmoved, int level, boolean weAlreadyPopped, boolean theyAlreadyPopped) {
+	private static void EvaluateMove(MoveRecord desiredMove, int[][] gboard, int lastmoved, int level, boolean weAlreadyPopped,
+			boolean theyAlreadyPopped, Double parentBest) {
 		
 		int currentLevel = level + 1;
 		
@@ -68,6 +71,9 @@ public class MoveAlgorithm {
 			desiredMove.setValue(-1.0 / level);
 			return;
 		}
+		
+		//if(weMUSTstop)
+		//do heuristic
 		
 		//copy gameboard
 		int[][] board = new int[TestPlayer.numrows][TestPlayer.numcolumns];
@@ -104,25 +110,33 @@ public class MoveAlgorithm {
 				}
 			}
 		}
+		
+		//Alpha Beta Pruning selection
+		MoveRecord best = new MoveRecord(null, null, null);
+		if(lastmoved == 1) best.setValue(-99999.9);
+		else best.setValue(99999.9);
 		for(MoveRecord r : possibleMoves) {
-			EvaluateMove(r, TestPlayer.gameboard, player, currentLevel, wepopped, theypopped);
+			EvaluateMove(r, TestPlayer.gameboard, player, currentLevel, wepopped, theypopped, best.getValue());
+			
+			//max
+			if(lastmoved == 1 && r.getValue() > best.getValue()) {
+				best = r;
+				if(best.getValue() > parentBest) {
+					break; //alpha beta says stop
+				}
+			}
+			
+			//min
+			else if(lastmoved == -1 && r.getValue() < best.getValue()) {
+				best = r;
+				if(best.getValue() < parentBest) {
+					break; //alpha beta says stop
+				}
+			}
+			
+			
 		}
 		
-		MoveRecord best = new MoveRecord(null, null, null);
-		//max
-		if(lastmoved == 1) {
-			best.setValue(-99999.9);
-			for(MoveRecord r : possibleMoves) {
-				if(r.getValue() > best.getValue()) best = r;
-			}
-		}
-		//min
-		else {
-			best.setValue(99999.9);
-			for(MoveRecord r : possibleMoves) {
-				if(r.getValue() < best.getValue()) best = r;
-			}
-		}
 		desiredMove.setValue(best.getValue());
 	}
 	
