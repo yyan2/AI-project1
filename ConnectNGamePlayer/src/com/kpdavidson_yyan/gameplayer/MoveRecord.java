@@ -1,3 +1,7 @@
+/**
+ * Kyle Davidson
+ * Yan Yan
+ */
 package com.kpdavidson_yyan.gameplayer;
 
 public class MoveRecord {

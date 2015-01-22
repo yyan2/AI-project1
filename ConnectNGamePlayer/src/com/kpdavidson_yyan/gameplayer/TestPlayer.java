@@ -65,36 +65,40 @@ public class TestPlayer {
 		System.out.println(TestPlayer.playerName);
 		System.out.flush();
 		
-		int test = 1;
 		String str = input.readLine();		//read game config
 		String[] gameConfig = str.split(" ");
-		try{
-			numrows = Integer.parseInt(gameConfig[0]);
-		} catch(Exception e){
-			test = 2;
-		}
-		try{
-			numcolumns = Integer.parseInt(gameConfig[1]);
-		} catch(Exception e){
-			test++;
+		
+		if(gameConfig.length != 5){
+			System.out.println("BAD INPUT");
+			return;
 		}
 		
+		numrows = Integer.parseInt(gameConfig[0]);
+		numcolumns = Integer.parseInt(gameConfig[1]);
 		gameboard = new int[numrows][numcolumns];
 		winlength = Integer.parseInt(gameConfig[2]);
-
-
-		while(gameConfig.length == 4){
-			input.readLine();
-			System.out.println(test + " 1");
-			System.out.flush();
-		}
 
 	
 		timelimit = Integer.parseInt(gameConfig[4]);
 		
 		if(Integer.parseInt(gameConfig[3]) == 1) {
 			//run getBestMove
-			int[] ourMove = MoveAlgorithm.doBestMove();
+			long TimeLeft = timelimit * 1000000000;
+			long beginTime = System.nanoTime();
+			int startlevel = 2;
+			
+			int[] ourMove = MoveAlgorithm.doBestMove(startlevel);
+			long TimeElapsed = System.nanoTime() - beginTime;
+			TimeLeft = TimeLeft - TimeElapsed;
+			
+			while(TimeLeft > (TimeElapsed + (TimeElapsed * (numcolumns * 2)))) {
+				beginTime = System.nanoTime();
+				startlevel++;
+				ourMove = MoveAlgorithm.doBestMove(startlevel);
+				TimeElapsed = System.nanoTime() - beginTime;
+				TimeLeft = TimeLeft - TimeElapsed;
+			}
+			
 			//make the move
 			Determine_and_move(ourMove);
 			//output our move
@@ -119,7 +123,22 @@ public class TestPlayer {
 				}
 				
 				//run getBestMove
-				int[] ourMove = MoveAlgorithm.doBestMove();
+				long TimeLeft = timelimit * 1000000000;
+				long beginTime = System.nanoTime();
+				int startlevel = 2;
+				
+				int[] ourMove = MoveAlgorithm.doBestMove(startlevel);
+				long TimeElapsed = System.nanoTime() - beginTime;
+				TimeLeft = TimeLeft - TimeElapsed;
+				
+				System.out.println("TimeLeft: " + TimeLeft + " Next's Cost: " + (TimeElapsed + (TimeElapsed * (numcolumns * 2))));
+				while(TimeLeft > (TimeElapsed + (TimeElapsed * (numcolumns * 2)))) {
+					beginTime = System.nanoTime();
+					startlevel++;
+					ourMove = MoveAlgorithm.doBestMove(startlevel);
+					TimeElapsed = System.nanoTime() - beginTime;
+					TimeLeft = TimeLeft - TimeElapsed;
+				}
 		
 				//make the move
 				Determine_and_move(ourMove);
@@ -132,14 +151,11 @@ public class TestPlayer {
 				continueGame = false;
 				System.out.println("game over!!!");
 			}
-////			else if(ls.size()==5){          //ls contains game info
-////				init(ls);
-////			}
 			else {
 				continueGame = false;
 				System.out.println("not what I want");
 			}
-			/*
+			/* DEBUG
 			System.out.println("board--");
 			for(int i = gameboard.length - 1; i >= 0 ; i--){
 				for(int j = 0; j < gameboard[0].length ; j++){

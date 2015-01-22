@@ -1,3 +1,7 @@
+/**
+ * Kyle Davidson
+ * Yan Yan
+ */
 package com.kpdavidson_yyan.gameplayer;
 
 import java.util.ArrayList;
@@ -7,7 +11,7 @@ import java.util.List;
 
 public class MoveAlgorithm {
 	
-	public static int[] doBestMove() {
+	public static int[] doBestMove(int maxlevel) {
 		
 		int[] bestmove = new int[2];
 		List<MoveRecord> possibleMoves = new ArrayList<MoveRecord>();
@@ -31,10 +35,10 @@ public class MoveAlgorithm {
 		Double bestValue = -99999.9;
 		for(MoveRecord r : possibleMoves) {
 			if(TestPlayer.wePopped) {
-				EvaluateMove(r, TestPlayer.gameboard, 1, 2, true, TestPlayer.theyPopped, bestValue);
+				EvaluateMove(r, TestPlayer.gameboard, 1, 2, true, TestPlayer.theyPopped, bestValue, maxlevel);
 			}
 			else {
-				EvaluateMove(r, TestPlayer.gameboard, 1, 2, false, TestPlayer.theyPopped, bestValue);
+				EvaluateMove(r, TestPlayer.gameboard, 1, 2, false, TestPlayer.theyPopped, bestValue, maxlevel);
 			}
 			if(r.getValue() > bestValue) bestValue = r.getValue();
 		}
@@ -51,6 +55,7 @@ public class MoveAlgorithm {
 		bestmove[0] = best.getColumn();
 		bestmove[1] = best.getMovetype();
 		
+		
 		return bestmove;
 	}
 	
@@ -59,16 +64,12 @@ public class MoveAlgorithm {
 	
 
 	private static void EvaluateMove(MoveRecord desiredMove, int[][] gboard, int lastmoved, int level, boolean weAlreadyPopped,
-			boolean theyAlreadyPopped, Double parentBest) {
-		
+			boolean theyAlreadyPopped, Double parentBest, int maxlevel) {
+		System.out.println("Evaluating Level " + level);
 		int currentLevel = level + 1;
 		
 		boolean wepopped = weAlreadyPopped;
 		boolean theypopped = theyAlreadyPopped;
-		
-		
-		//if(weMUSTstop)
-		//do heuristic
 		
 		//copy game board
 		int[][] board = new int[TestPlayer.numrows][TestPlayer.numcolumns];
@@ -91,9 +92,9 @@ public class MoveAlgorithm {
 		if(govercheck >= -1 && govercheck <= 1){
 			double finalValue = 0.0;
 			if(govercheck == 1) {
-				finalValue = 1.0 / level;
+				finalValue = 9999999999.0 / level;
 			} else if(govercheck == -1) {
-				finalValue = -1.0 / level;
+				finalValue = -9999999999.0 / level;
 			}
 			
 			desiredMove.setValue(finalValue);
@@ -101,6 +102,13 @@ public class MoveAlgorithm {
 			
 			return;
 			
+		}
+		
+		//if(weMUSTstop) do heuristic
+		if(level == maxlevel) {
+			System.out.println("Performing Heuristic at Level " + level);
+			desiredMove.setValue(heuristicEval(board));
+			return;
 		}
 		
 		int player = lastmoved * -1;
@@ -127,7 +135,7 @@ public class MoveAlgorithm {
 		if(lastmoved == 1) best.setValue(-99999.9);
 		else best.setValue(99999.9);
 		for(MoveRecord r : possibleMoves) {
-			EvaluateMove(r, board, player, currentLevel, wepopped, theypopped, best.getValue());
+			EvaluateMove(r, board, player, currentLevel, wepopped, theypopped, best.getValue(), maxlevel);
 			
 			//max
 			if(lastmoved == 1 && r.getValue() > best.getValue()) {
@@ -317,6 +325,132 @@ public class MoveAlgorithm {
 		if(weWon && weLost) result = 0;
 		else if(weWon) result = 1;
 		else if(weLost) result = -1;
+		
+		return result;
+	}
+	
+	
+	private static Double heuristicEval(int[][] board) {
+		Double result = 0.0;
+		int threshold = Math.min(4, TestPlayer.winlength - 1);
+		
+		int i,j;
+		
+		//vertical (column) Check for chains
+		for(i = 0; i < TestPlayer.numcolumns; i++){
+			int count = 0;
+			for(j = TestPlayer.numrows - 1; j >= 0; j--){
+				if(board[j][i] == 0) continue;
+				if(count != 0 && board[j][i] / count < 0){
+					if(Math.abs(count) >= threshold) result += count;
+					count = 0;
+				}
+				count += board[j][i];
+			}
+			if(Math.abs(count) >= threshold) result += count;
+		}
+		
+		//Horizontal (row) Check
+		for(i = 0; i < TestPlayer.numrows; i++){
+			int count = board[i][0];
+			int player = board[i][0];
+			for(j = 1; j <= TestPlayer.numcolumns - 1; j++){
+				if(board[i][j] == 0) {
+					if(Math.abs(count) >= threshold) result += count;
+					count = 0;
+					player = 0;
+					continue;
+				}
+				else if(board[i][j] == player) count = count + board[i][j];
+				else if(board[i][j] != player) {
+					if(Math.abs(count) >= threshold) result += count;
+					player = board[i][j];
+					count = board[i][j];
+				}
+			}
+			if(Math.abs(count) >= threshold) result += count;
+		}
+		
+		//Diagonal (\) check
+		for(i=0;i<=TestPlayer.numcolumns-1;i++){
+			int x = i, y = TestPlayer.numrows - 1;
+			int count = 0;
+			while(x < TestPlayer.numcolumns && y >= 0){
+				if(board[y][x] == 0) {
+					if(Math.abs(count) >= threshold) result += count;
+					count = 0;
+				}
+				else if(count == 0) count = board[y][x];
+				else if(board[y][x] == (count / Math.abs(count))) count += board[y][x];
+				else {
+					if(Math.abs(count) >= threshold) result += count;
+					count = board[y][x];
+				}
+				x++;
+				y--;
+			}
+			if(Math.abs(count) >= threshold) result += count;
+			
+		}
+		for(i = 0; i < TestPlayer.numrows - 1; i++){
+			int y = i, x = 0;
+			int count = 0;
+			while(x < TestPlayer.numcolumns && y >= 0){
+				if(board[y][x] == 0) {
+					if(Math.abs(count) >= threshold) result += count;
+					count = 0;
+				}
+				else if(count == 0) count = board[y][x];
+				else if(board[y][x] == (count / Math.abs(count))) count += board[y][x];
+				else {
+					if(Math.abs(count) >= threshold) result += count;
+					count = board[y][x];
+				}
+				x++;
+				y--;
+			}
+			if(Math.abs(count) >= threshold) result += count;
+		}
+		
+		//diagonal (/) check
+		for(i=0;i<=TestPlayer.numcolumns-1;i++){
+			int x = i, y = 0;
+			int count = 0;
+			while(x < TestPlayer.numcolumns && y < TestPlayer.numrows){
+				if(board[y][x] == 0) {
+					if(Math.abs(count) >= threshold) result += count;
+					count = 0;
+				}
+				else if(count == 0) count = board[y][x];
+				else if(board[y][x] == (count / Math.abs(count))) count += board[y][x];
+				else {
+					if(Math.abs(count) >= threshold) result += count;
+					count = board[y][x];
+				}
+				x++;
+				y++;
+			}
+			if(Math.abs(count) >= threshold) result += count;
+		}
+		for(i = 1; i < TestPlayer.numrows; i++){
+			int y = i, x = 0;
+			int count = 0;
+			while(x < TestPlayer.numcolumns && y < TestPlayer.numrows){
+				if(board[y][x] == 0) {
+					if(Math.abs(count) >= threshold) result += count;
+					count = 0;
+				}
+				else if(count == 0) count = board[y][x];
+				else if(board[y][x] == (count / Math.abs(count))) count += board[y][x];
+				else {
+					if(Math.abs(count) >= threshold) result += count;
+					count = board[y][x];
+				}
+				x++;
+				y++;
+			}
+			if(Math.abs(count) >= threshold) result += count;
+		}
 		
 		return result;
 	}
