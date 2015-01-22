@@ -139,6 +139,7 @@ public class TestPlayer {
 				continueGame = false;
 				System.out.println("not what I want");
 			}
+			/*
 			System.out.println("board--");
 			for(int i = gameboard.length - 1; i >= 0 ; i--){
 				for(int j = 0; j < gameboard[0].length ; j++){
@@ -148,7 +149,7 @@ public class TestPlayer {
 				System.out.println();
 			}
 			System.out.println("--board");
-			
+			*/
 		}
 	}
 

@@ -6,16 +6,6 @@ import java.util.HashSet;
 import java.util.List;
 
 public class MoveAlgorithm {
-	static HashSet<int[][]> unfinishedBoardOurDroppingRecord = new HashSet<int[][]>();
-	static HashSet<int[][]> unfinishedBoardOurPoppingRecord = new HashSet<int[][]>();
-	static HashSet<int[][]> unfinishedBoardTheirDroppingRecord = new HashSet<int[][]>();
-	static HashSet<int[][]> unfinishedBoardTheirPoppingRecord = new HashSet<int[][]>();
-	static HashMap<int[][], Double> finishedBoardOurDroppingMap = new HashMap<int[][], Double>();
-	static HashMap<int[][], Double> finishedBoardOurPoppingMap = new HashMap<int[][], Double>();
-	static HashMap<int[][], Double> finishedBoardTheirDroppingMap = new HashMap<int[][], Double>();
-	static HashMap<int[][], Double> finishedBoardTheirPoppingMap = new HashMap<int[][], Double>();
-
-	
 	
 	public static int[] doBestMove() {
 		
@@ -54,7 +44,7 @@ public class MoveAlgorithm {
 		best.setValue(-99999.9);
 		for(MoveRecord r : possibleMoves) {
 			if(r.getValue() > best.getValue()) best = r;
-			System.out.println("value is " + r.getValue() + " with move of " + r.getColumn() + " and type of " + r.getMovetype());
+			//System.out.println("value is " + r.getValue() + " with move of " + r.getColumn() + " and type of " + r.getMovetype());
 			
 		}
 		
@@ -64,30 +54,7 @@ public class MoveAlgorithm {
 		return bestmove;
 	}
 	
-	private static HashSet<int[][]> getBoardRecord(MoveRecord move){
-		if(move.getMovetype() == 1){
-			if(move.getPlayer() == 1){
-				return unfinishedBoardOurDroppingRecord;
-			} else return unfinishedBoardTheirDroppingRecord;
-		}
-		else {
-			if(move.getPlayer() == 1){
-				return unfinishedBoardOurPoppingRecord;
-			} else return unfinishedBoardTheirPoppingRecord;
-		}
-	}
 	
-	private static HashMap<int[][], Double> getBoardMap(MoveRecord move){
-		if(move.getMovetype() == 1){
-			if(move.getPlayer() == 1){
-				return finishedBoardOurDroppingMap;
-			} else return finishedBoardTheirDroppingMap;
-		}
-		else {
-			if(move.getPlayer() == 1){
-				return finishedBoardOurPoppingMap;
-			} else return finishedBoardTheirPoppingMap;
-		}	}
 	
 	
 
@@ -119,18 +86,6 @@ public class MoveAlgorithm {
 		}
 		
 		
-		//check for "visited" states (either a duplicate board or a board with a computed value)
-		HashSet<int[][]> record = getBoardRecord(desiredMove);
-		HashMap<int[][], Double> map = getBoardMap(desiredMove);
-		if(map.containsKey(board)){
-			desiredMove.setValue(map.get(board) / level);
-			return;
-		} else if(record.contains(board)){
-			desiredMove.setValue(lastmoved * -99999.9);
-			return;
-		} else record.add(board);
-		
-		
 		//game over check
 		int govercheck = gameOverCheck(board);
 		if(govercheck >= -1 && govercheck <= 1){
@@ -143,9 +98,7 @@ public class MoveAlgorithm {
 			
 			desiredMove.setValue(finalValue);
 			
-			//and update hash map and hash set to record this ending result
-			record.remove(board);
-			map.put(board, (double)govercheck);
+			
 			return;
 			
 		}
@@ -195,8 +148,6 @@ public class MoveAlgorithm {
 			
 		}
 		
-		record.remove(board);
-		map.put(board, best.getValue() * level);
 		desiredMove.setValue(best.getValue());
 	}
 
