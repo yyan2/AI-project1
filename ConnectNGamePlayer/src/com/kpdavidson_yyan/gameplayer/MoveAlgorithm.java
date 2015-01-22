@@ -1,14 +1,25 @@
 package com.kpdavidson_yyan.gameplayer;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Stack;
 
 public class MoveAlgorithm {
+	static HashSet<int[][]> unfinishedBoardOurDroppingRecord = new HashSet<int[][]>();
+	static HashSet<int[][]> unfinishedBoardOurPoppingRecord = new HashSet<int[][]>();
+	static HashSet<int[][]> unfinishedBoardTheirDroppingRecord = new HashSet<int[][]>();
+	static HashSet<int[][]> unfinishedBoardTheirPoppingRecord = new HashSet<int[][]>();
+	static HashMap<int[][], Double> finishedBoardOurDroppingMap = new HashMap<int[][], Double>();
+	static HashMap<int[][], Double> finishedBoardOurPoppingMap = new HashMap<int[][], Double>();
+	static HashMap<int[][], Double> finishedBoardTheirDroppingMap = new HashMap<int[][], Double>();
+	static HashMap<int[][], Double> finishedBoardTheirPoppingMap = new HashMap<int[][], Double>();
+
 	
-	public static List<Integer> doBestMove() {
+	
+	public static int[] doBestMove() {
 		
-		List<Integer> bestmove = new ArrayList<Integer>();
+		int[] bestmove = new int[2];
 		List<MoveRecord> possibleMoves = new ArrayList<MoveRecord>();
 		
 		//get all our possible moves
@@ -16,12 +27,14 @@ public class MoveAlgorithm {
 		for(i=0;i<TestPlayer.numcolumns; i++) {
 			if(TestPlayer.gameboard[TestPlayer.numrows-1][i] == 0) {
 				possibleMoves.add(new MoveRecord(1, i, 1));
+				
 			}
 		}
 		if(!TestPlayer.wePopped) {
 			for(i=0;i<TestPlayer.numcolumns; i++) {
 				if(TestPlayer.gameboard[0][i] == 1) {
 					possibleMoves.add(new MoveRecord(1, i, 0));
+					
 				}
 			}
 		}
@@ -37,18 +50,47 @@ public class MoveAlgorithm {
 		}
 		
 		// choose move with highest value
-		MoveRecord best = new MoveRecord(null, null, null);
+		MoveRecord best = new MoveRecord(1, null, null);
 		best.setValue(-99999.9);
 		for(MoveRecord r : possibleMoves) {
 			if(r.getValue() > best.getValue()) best = r;
+			System.out.println("value is " + r.getValue() + " with move of " + r.getColumn() + " and type of " + r.getMovetype());
+			
 		}
 		
-		bestmove.set(0, best.getColumn());
-		bestmove.set(1, best.getMovetype());
+		bestmove[0] = best.getColumn();
+		bestmove[1] = best.getMovetype();
 		
 		return bestmove;
 	}
 	
+	private static HashSet<int[][]> getBoardRecord(MoveRecord move){
+		if(move.getMovetype() == 1){
+			if(move.getPlayer() == 1){
+				return unfinishedBoardOurDroppingRecord;
+			} else return unfinishedBoardTheirDroppingRecord;
+		}
+		else {
+			if(move.getPlayer() == 1){
+				return unfinishedBoardOurPoppingRecord;
+			} else return unfinishedBoardTheirPoppingRecord;
+		}
+	}
+	
+	private static HashMap<int[][], Double> getBoardMap(MoveRecord move){
+		if(move.getMovetype() == 1){
+			if(move.getPlayer() == 1){
+				return finishedBoardOurDroppingMap;
+			} else return finishedBoardTheirDroppingMap;
+		}
+		else {
+			if(move.getPlayer() == 1){
+				return finishedBoardOurPoppingMap;
+			} else return finishedBoardTheirPoppingMap;
+		}	}
+	
+	
+
 	private static void EvaluateMove(MoveRecord desiredMove, int[][] gboard, int lastmoved, int level, boolean weAlreadyPopped,
 			boolean theyAlreadyPopped, Double parentBest) {
 		
@@ -57,35 +99,18 @@ public class MoveAlgorithm {
 		boolean wepopped = weAlreadyPopped;
 		boolean theypopped = theyAlreadyPopped;
 		
-		//Game Over Check
-		int govercheck = gameOverCheck(gboard);
-		if(govercheck == 0) {
-			desiredMove.setValue(0.0);
-			return;
-		}
-		else if(govercheck == 1) {
-			desiredMove.setValue(1.0 / level);
-			return;
-		}
-		else if(govercheck == -1) {
-			desiredMove.setValue(-1.0 / level);
-			return;
-		}
 		
 		//if(weMUSTstop)
 		//do heuristic
 		
-		//copy gameboard
+		//copy game board
 		int[][] board = new int[TestPlayer.numrows][TestPlayer.numcolumns];
-		int i,j;
-		for(i=0;i<TestPlayer.numrows;i++) {
-			for(j=0;j<TestPlayer.numcolumns;j++) {
-				board[i][j] = gboard[i][j];
-			}
-		}
+		copyBoard(gboard, board);
 		
-		if(desiredMove.getMovetype() == 0) {
+		//do move
+		if(desiredMove.getMovetype() == 1) {
 			makeDropMove(lastmoved, desiredMove.getColumn(), board);
+			
 		}
 		else {
 			makePopMove(desiredMove.getColumn(), board);
@@ -93,30 +118,63 @@ public class MoveAlgorithm {
 			else theypopped = true;
 		}
 		
+		
+		//check for "visited" states (either a duplicate board or a board with a computed value)
+		HashSet<int[][]> record = getBoardRecord(desiredMove);
+		HashMap<int[][], Double> map = getBoardMap(desiredMove);
+		if(map.containsKey(board)){
+			desiredMove.setValue(map.get(board) / level);
+			return;
+		} else if(record.contains(board)){
+			desiredMove.setValue(lastmoved * -99999.9);
+			return;
+		} else record.add(board);
+		
+		
+		//game over check
+		int govercheck = gameOverCheck(board);
+		if(govercheck >= -1 && govercheck <= 1){
+			double finalValue = 0.0;
+			if(govercheck == 1) {
+				finalValue = 1.0 / level;
+			} else if(govercheck == -1) {
+				finalValue = -1.0 / level;
+			}
+			
+			desiredMove.setValue(finalValue);
+			
+			//and update hash map and hash set to record this ending result
+			record.remove(board);
+			map.put(board, (double)govercheck);
+			return;
+			
+		}
+		
 		int player = lastmoved * -1;
 		
 		List<MoveRecord> possibleMoves = new ArrayList<MoveRecord>();
 		
 		//get all possible moves
+		int i;
 		for(i=0;i<TestPlayer.numcolumns; i++) {
-			if(gboard[TestPlayer.numrows-1][i] == 0) {
+			if(board[TestPlayer.numrows-1][i] == 0) {
 				possibleMoves.add(new MoveRecord(player, i, 1));
 			}
 		}
 		if((player == 1 && !wepopped) ||(player == -1 && !theypopped)) {
 			for(i=0;i<TestPlayer.numcolumns; i++) {
-				if(gboard[0][i] == player) {
+				if(board[0][i] == player) {
 					possibleMoves.add(new MoveRecord(player, i, 0));
 				}
 			}
 		}
 		
 		//Alpha Beta Pruning selection
-		MoveRecord best = new MoveRecord(null, null, null);
+		MoveRecord best = new MoveRecord(player, null, null);
 		if(lastmoved == 1) best.setValue(-99999.9);
 		else best.setValue(99999.9);
 		for(MoveRecord r : possibleMoves) {
-			EvaluateMove(r, TestPlayer.gameboard, player, currentLevel, wepopped, theypopped, best.getValue());
+			EvaluateMove(r, board, player, currentLevel, wepopped, theypopped, best.getValue());
 			
 			//max
 			if(lastmoved == 1 && r.getValue() > best.getValue()) {
@@ -137,7 +195,18 @@ public class MoveAlgorithm {
 			
 		}
 		
+		record.remove(board);
+		map.put(board, best.getValue() * level);
 		desiredMove.setValue(best.getValue());
+	}
+
+	private static void copyBoard(int[][] gboard, int[][] board) {
+		int i,j;
+		for(i=0;i<TestPlayer.numrows;i++) {
+			for(j=0;j<TestPlayer.numcolumns;j++) {
+				board[i][j] = gboard[i][j];
+			}
+		}
 	}
 	
 	static void makeDropMove(int player, int column, int[][] board) {
