@@ -61,13 +61,17 @@ public class TestPlayer {
 	}
 	
 	public static void main(String[] args) throws IOException {
-		
 		System.out.println(TestPlayer.playerName);
-		System.out.flush();
+//		 fw.write(TestPlayer.playerName);
 		
-		String str = input.readLine();		//read game config
+		Logger.init();	//comment out if we no longer need it
+		
+		String str = input.readLine();		//throw out player name line
+		Logger.log(str);
+		str = input.readLine();				//read game config
+		Logger.log(str);
+
 		String[] gameConfig = str.split(" ");
-		
 		if(gameConfig.length != 5){
 			System.out.println("BAD INPUT");
 			return;
@@ -77,11 +81,9 @@ public class TestPlayer {
 		numcolumns = Integer.parseInt(gameConfig[1]);
 		gameboard = new int[numrows][numcolumns];
 		winlength = Integer.parseInt(gameConfig[2]);
-
-	
 		timelimit = Integer.parseInt(gameConfig[4]);
 		
-		if(Integer.parseInt(gameConfig[3]) == 1) {
+		if(Integer.parseInt(gameConfig[3]) == 1) { //we start first
 			//run getBestMove
 			long TimeLeft = timelimit * 1000000000;
 			long beginTime = System.nanoTime();
@@ -131,13 +133,14 @@ public class TestPlayer {
 				long TimeElapsed = System.nanoTime() - beginTime;
 				TimeLeft = TimeLeft - TimeElapsed;
 				
-				System.out.println("TimeLeft: " + TimeLeft + " Next's Cost: " + (TimeElapsed + (TimeElapsed * (numcolumns * 2))));
+				Logger.log("TimeLeft: " + TimeLeft + " Next's Cost: " + (TimeElapsed + (TimeElapsed * (numcolumns * 2))));
 				while(TimeLeft > (TimeElapsed + (TimeElapsed * (numcolumns * 2)))) {
 					beginTime = System.nanoTime();
 					startlevel++;
 					ourMove = MoveAlgorithm.doBestMove(startlevel);
 					TimeElapsed = System.nanoTime() - beginTime;
 					TimeLeft = TimeLeft - TimeElapsed;
+					Logger.log("TimeLeft: " + TimeLeft + " Next's Cost: " + (TimeElapsed + (TimeElapsed * (numcolumns * 2))));
 				}
 		
 				//make the move
@@ -155,17 +158,19 @@ public class TestPlayer {
 				continueGame = false;
 				System.out.println("not what I want");
 			}
-			/* DEBUG
-			System.out.println("board--");
+			
+			StringBuilder debugString = new StringBuilder();
+			debugString.append("\r\nboard-----\r\n");
 			for(int i = gameboard.length - 1; i >= 0 ; i--){
 				for(int j = 0; j < gameboard[0].length ; j++){
 				
-					System.out.print(gameboard[i][j]);
+					debugString.append((gameboard[i][j] == 0 ? 0 : (gameboard[i][j] == -1 ? 2 : 1)) + " ");
 				}
-				System.out.println();
+				debugString.append("\r\n");
 			}
-			System.out.println("--board");
-			*/
+			debugString.append("\r\n-----board\r\n");
+			
+			Logger.log(debugString.toString());
 		}
 	}
 

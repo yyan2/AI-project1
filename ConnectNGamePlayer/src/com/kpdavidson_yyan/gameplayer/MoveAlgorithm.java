@@ -5,8 +5,6 @@
 package com.kpdavidson_yyan.gameplayer;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 
 public class MoveAlgorithm {
@@ -48,7 +46,7 @@ public class MoveAlgorithm {
 		best.setValue(-99999.9);
 		for(MoveRecord r : possibleMoves) {
 			if(r.getValue() > best.getValue()) best = r;
-			//System.out.println("value is " + r.getValue() + " with move of " + r.getColumn() + " and type of " + r.getMovetype());
+			Logger.log("value is " + r.getValue() + " with move of " + r.getColumn() + " and type of " + r.getMovetype());
 			
 		}
 		
@@ -65,7 +63,6 @@ public class MoveAlgorithm {
 
 	private static void EvaluateMove(MoveRecord desiredMove, int[][] gboard, int lastmoved, int level, boolean weAlreadyPopped,
 			boolean theyAlreadyPopped, Double parentBest, int maxlevel) {
-		System.out.println("Evaluating Level " + level);
 		int currentLevel = level + 1;
 		
 		boolean wepopped = weAlreadyPopped;
@@ -106,7 +103,7 @@ public class MoveAlgorithm {
 		
 		//if(weMUSTstop) do heuristic
 		if(level == maxlevel) {
-			System.out.println("Performing Heuristic at Level " + level);
+			Logger.log("Performing Heuristic at Level " + level);
 			desiredMove.setValue(heuristicEval(board));
 			return;
 		}
