@@ -10,7 +10,13 @@ import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.List;
 
-
+/**
+ * 
+ * @author Kyle & Yan
+ * 
+ * Assume that the maximum allowed time to compute a move is 10 seconds
+ *
+ */
 public class TestPlayer {
 
 	static final String playerName="kpdavidson_yyan";
@@ -81,7 +87,7 @@ public class TestPlayer {
 		numcolumns = Integer.parseInt(gameConfig[1]);
 		gameboard = new int[numrows][numcolumns];
 		winlength = Integer.parseInt(gameConfig[2]);
-		timelimit = ((Integer.parseInt(gameConfig[4])) * 1000000) / 4 * 3; //get 3/4 of the allowed time
+		timelimit = ((Integer.parseInt(gameConfig[4])) * 1000) / 4 * 3; //get 3/4 of the allowed time
 		
 		if(Integer.parseInt(gameConfig[3]) == 1) { //we start first
 			//run getBestMove
