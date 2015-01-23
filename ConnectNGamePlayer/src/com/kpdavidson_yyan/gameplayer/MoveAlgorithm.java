@@ -9,7 +9,13 @@ import java.util.List;
 
 public class MoveAlgorithm {
 	
+	static boolean completed = true;
+	static long begintime;
+	static int turns = 0;
+	
 	public static int[] doBestMove(int maxlevel) {
+		
+		completed = true;
 		
 		int[] bestmove = new int[2];
 		List<MoveRecord> possibleMoves = new ArrayList<MoveRecord>();
@@ -64,6 +70,13 @@ public class MoveAlgorithm {
 	private static void EvaluateMove(MoveRecord desiredMove, int[][] gboard, int lastmoved, int level, boolean weAlreadyPopped,
 			boolean theyAlreadyPopped, Double parentBest, int maxlevel) {
 		int currentLevel = level + 1;
+		
+		Logger.log(System.currentTimeMillis() + " - " + begintime + " > " + TestPlayer.timelimit);
+		if(System.currentTimeMillis() - begintime > TestPlayer.timelimit) {
+			completed = false;
+			desiredMove.setValue(99999.9); //this is for possible null pointer problems, value is not used
+			return;
+		}
 		
 		boolean wepopped = weAlreadyPopped;
 		boolean theypopped = theyAlreadyPopped;
@@ -329,7 +342,14 @@ public class MoveAlgorithm {
 	
 	private static Double heuristicEval(int[][] board) {
 		Double result = 0.0;
-		int threshold = Math.min(4, TestPlayer.winlength - 1);
+		int threshold;
+		if(turns > 7) {
+			threshold = Math.min(4, TestPlayer.winlength - 1);
+		}
+		else {
+			threshold = Math.min(3, TestPlayer.winlength - 1);
+		}
+		
 		
 		int i,j;
 		

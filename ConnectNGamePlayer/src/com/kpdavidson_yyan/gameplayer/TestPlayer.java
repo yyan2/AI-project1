@@ -22,7 +22,7 @@ public class TestPlayer {
 	static int numrows;
 	static int numcolumns;
 	static int winlength; //number of pieces in a row to win
-	static int timelimit;
+	static long timelimit;
 	static boolean wePopped = false;
 	static boolean theyPopped = false;
 
@@ -76,29 +76,25 @@ public class TestPlayer {
 			System.out.println("BAD INPUT");
 			return;
 		}
-		
+		MoveAlgorithm.begintime = System.currentTimeMillis();
 		numrows = Integer.parseInt(gameConfig[0]);
 		numcolumns = Integer.parseInt(gameConfig[1]);
 		gameboard = new int[numrows][numcolumns];
 		winlength = Integer.parseInt(gameConfig[2]);
-		timelimit = Integer.parseInt(gameConfig[4]);
+		timelimit = ((Integer.parseInt(gameConfig[4])) * 1000000) / 4 * 3; //get 3/4 of the allowed time
 		
 		if(Integer.parseInt(gameConfig[3]) == 1) { //we start first
 			//run getBestMove
-			long TimeLeft = timelimit * 1000000000;
-			long beginTime = System.nanoTime();
 			int startlevel = 2;
 			
 			int[] ourMove = MoveAlgorithm.doBestMove(startlevel);
-			long TimeElapsed = System.nanoTime() - beginTime;
-			TimeLeft = TimeLeft - TimeElapsed;
 			
-			while(TimeLeft > (TimeElapsed + (TimeElapsed * (numcolumns * 2)))) {
-				beginTime = System.nanoTime();
+			while(MoveAlgorithm.completed) {
 				startlevel++;
-				ourMove = MoveAlgorithm.doBestMove(startlevel);
-				TimeElapsed = System.nanoTime() - beginTime;
-				TimeLeft = TimeLeft - TimeElapsed;
+				int ournewMove[] = MoveAlgorithm.doBestMove(startlevel);
+				if(MoveAlgorithm.completed) {
+					ourMove = ournewMove;
+				}
 			}
 			
 			//make the move
@@ -111,8 +107,9 @@ public class TestPlayer {
 		
 		boolean continueGame = true;
 		while(continueGame) {
-			
-	    	String s=input.readLine();	
+			MoveAlgorithm.turns++;
+	    	String s=input.readLine();
+	    	MoveAlgorithm.begintime = System.currentTimeMillis();
 			List<String> ls=Arrays.asList(s.split(" "));
 			if(ls.size()==2){
 				//opponents move
@@ -125,22 +122,16 @@ public class TestPlayer {
 				}
 				
 				//run getBestMove
-				long TimeLeft = timelimit * 1000000000;
-				long beginTime = System.nanoTime();
 				int startlevel = 2;
 				
 				int[] ourMove = MoveAlgorithm.doBestMove(startlevel);
-				long TimeElapsed = System.nanoTime() - beginTime;
-				TimeLeft = TimeLeft - TimeElapsed;
 				
-				Logger.log("TimeLeft: " + TimeLeft + " Next's Cost: " + (TimeElapsed + (TimeElapsed * (numcolumns * 2))));
-				while(TimeLeft > (TimeElapsed + (TimeElapsed * (numcolumns * 2)))) {
-					beginTime = System.nanoTime();
+				while(MoveAlgorithm.completed) {
 					startlevel++;
-					ourMove = MoveAlgorithm.doBestMove(startlevel);
-					TimeElapsed = System.nanoTime() - beginTime;
-					TimeLeft = TimeLeft - TimeElapsed;
-					Logger.log("TimeLeft: " + TimeLeft + " Next's Cost: " + (TimeElapsed + (TimeElapsed * (numcolumns * 2))));
+					int ournewMove[] = MoveAlgorithm.doBestMove(startlevel);
+					if(MoveAlgorithm.completed) {
+						ourMove = ournewMove;
+					}
 				}
 		
 				//make the move
