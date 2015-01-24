@@ -127,6 +127,19 @@ public class TestPlayer {
 					theyPopped = true;
 				}
 				
+				StringBuilder debugString = new StringBuilder();
+				debugString.append("\r\nboard-----\r\n");
+				for(int i = gameboard.length - 1; i >= 0 ; i--){
+					for(int j = 0; j < gameboard[0].length ; j++){
+					
+						debugString.append((gameboard[i][j] == 0 ? 0 : (gameboard[i][j] == -1 ? 2 : 1)) + " ");
+					}
+					debugString.append("\r\n");
+				}
+				debugString.append("\r\n-----board, opponent's move finished\r\n");
+				
+				Logger.log(debugString.toString());
+				
 				//run getBestMove
 				int startlevel = 2;
 				
@@ -134,6 +147,7 @@ public class TestPlayer {
 				
 				while(MoveAlgorithm.completed) {
 					startlevel++;
+					Logger.log("level " + startlevel);
 					int ournewMove[] = MoveAlgorithm.doBestMove(startlevel);
 					if(MoveAlgorithm.completed) {
 						ourMove = ournewMove;

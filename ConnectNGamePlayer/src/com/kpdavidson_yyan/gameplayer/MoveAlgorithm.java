@@ -71,7 +71,7 @@ public class MoveAlgorithm {
 			boolean theyAlreadyPopped, Double parentBest, int maxlevel) {
 		int currentLevel = level + 1;
 		
-		Logger.log(System.currentTimeMillis() - begintime + " > " + TestPlayer.timelimit);
+		//Logger.log(System.currentTimeMillis() - begintime + " > " + TestPlayer.timelimit);
 		if(System.currentTimeMillis() - begintime > TestPlayer.timelimit) {
 			completed = false;
 			desiredMove.setValue(99999.9); //this is for possible null pointer problems, value is not used
@@ -116,7 +116,7 @@ public class MoveAlgorithm {
 		
 		//if(weMUSTstop) do heuristic
 		if(level == maxlevel) {
-			Logger.log("Performing Heuristic at Level " + level);
+//			Logger.log("Performing Heuristic at Level " + level);
 			desiredMove.setValue(heuristicEval(board));
 			return;
 		}
