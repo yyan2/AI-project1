@@ -25,10 +25,9 @@ public class MoveAlgorithm {
 	 */
 	public static int[] doBestMove(int maxlevel) {
 		
-		completed = true;
-		
-		int[] bestmove = new int[2];
-		List<MoveRecord> possibleMoves = new ArrayList<MoveRecord>();
+		completed = true; //assume that we do finish
+		int[] bestmove = new int[2];// the move being returned
+		List<MoveRecord> possibleMoves = new ArrayList<MoveRecord>(); //a list of all possible moves from the current board state
 		
 		//get all our possible moves
 		int i;
@@ -46,7 +45,9 @@ public class MoveAlgorithm {
 				}
 			}
 		}
-		Double bestValue = -99999.9;
+		
+		//for all possible moves evaluate how good they are
+		Double bestValue = -99999.9; //begin assuming worst case scenario (for alpha beta pruning)
 		for(MoveRecord r : possibleMoves) {
 			if(TestPlayer.wePopped) {
 				EvaluateMove(r, TestPlayer.gameboard, 1, 2, true, TestPlayer.theyPopped, bestValue, maxlevel);
@@ -91,7 +92,7 @@ public class MoveAlgorithm {
 		//Logger.log(System.currentTimeMillis() - begintime + " > " + TestPlayer.timelimit);
 		if(System.currentTimeMillis() - begintime > TestPlayer.timelimit) {
 			completed = false;
-			desiredMove.setValue(99999.9); //this is for possible null pointer problems, value is not used
+			desiredMove.setValue(99999.9); //this is for possible null pointer problems, value is not used due to timeout
 			return;
 		}
 		
@@ -102,7 +103,7 @@ public class MoveAlgorithm {
 		int[][] board = new int[TestPlayer.numrows][TestPlayer.numcolumns];
 		copyBoard(gboard, board);
 		
-		//do move
+		//perform desiredMove
 		if(desiredMove.getMovetype() == 1) {
 			makeDropMove(lastmoved, desiredMove.getColumn(), board);
 			
@@ -114,30 +115,30 @@ public class MoveAlgorithm {
 		}
 		
 		
-		//game over check
+		//game over check, if game is over stop and set value that cannot be ignored
 		int govercheck = gameOverCheck(board);
 		if(govercheck >= -1 && govercheck <= 1){
-			double finalValue = 0.0;
+			double finalValue = 0.0; //assume draw
 			if(govercheck == 1) {
-				finalValue = 9999999999.0 / level;
+				finalValue = 9999999999.0 / level; //we win
 			} else if(govercheck == -1) {
-				finalValue = -9999999999.0 / level;
+				finalValue = -9999999999.0 / level; //we lost
 			}
 			
 			desiredMove.setValue(finalValue);
-			
 			
 			return;
 			
 		}
 		
-		//if(weMUSTstop) do heuristic
+		//if we must stop perform heuristic
 		if(level == maxlevel) {
 //			Logger.log("Performing Heuristic at Level " + level);
 			desiredMove.setValue(heuristicEval(board));
 			return;
 		}
 		
+		// Begin evaluating all possible moves after desiredMove
 		int player = lastmoved * -1;
 		
 		List<MoveRecord> possibleMoves = new ArrayList<MoveRecord>();
@@ -157,10 +158,14 @@ public class MoveAlgorithm {
 			}
 		}
 		
-		//Alpha Beta Pruning selection
+		/*****************************************************************************************************************/
+		/* ALPHA BETA PRUNING selection */
+		
+		//choose super bad value
 		MoveRecord best = new MoveRecord(player, null, null);
 		if(lastmoved == 1) best.setValue(-99999.9);
 		else best.setValue(99999.9);
+		
 		for(MoveRecord r : possibleMoves) {
 			EvaluateMove(r, board, player, currentLevel, wepopped, theypopped, best.getValue(), maxlevel);
 			
@@ -168,7 +173,7 @@ public class MoveAlgorithm {
 			if(lastmoved == 1 && r.getValue() > best.getValue()) {
 				best = r;
 				if(best.getValue() > parentBest) {
-					break; //alpha beta says stop
+					break; //alpha beta says stop, this path will never be chosen
 				}
 			}
 			
@@ -176,11 +181,9 @@ public class MoveAlgorithm {
 			else if(lastmoved == -1 && r.getValue() < best.getValue()) {
 				best = r;
 				if(best.getValue() < parentBest) {
-					break; //alpha beta says stop
+					break; //alpha beta says stop, this path will never be chosen
 				}
 			}
-			
-			
 		}
 		
 		desiredMove.setValue(best.getValue());
