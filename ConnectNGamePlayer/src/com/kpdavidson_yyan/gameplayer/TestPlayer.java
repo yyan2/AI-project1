@@ -25,14 +25,18 @@ public class TestPlayer {
 	static int[][] gameboard; // a 1 indicates that we own that space, -1 indicates that enemy owns the space,
 					   // 0 indicates an unowned space
 					   // [Row][Column]
-	static int numrows;
-	static int numcolumns;
+	static int numrows; //number of rows on the board
+	static int numcolumns; //number of columns on the board
 	static int winlength; //number of pieces in a row to win
-	static long timelimit;
-	static boolean wePopped = false;
+	static long timelimit; //time dedicated to running computation
+	static boolean wePopped = false; //boolean ind
 	static boolean theyPopped = false;
 
-	
+	/**
+	 * Performs a drop on the board
+	 * @param player indicates the player doing the move (1=us, -1=enemy)
+	 * @param column the column number of the drop (0,1,...)
+	 */
 	static void makeDropMove(int player, int column) {
 		int row = 0;
 		
@@ -45,6 +49,10 @@ public class TestPlayer {
 		}
 	}
 	
+	/**
+	 * Performs a pop move on the board
+	 * @param column the column being popped
+	 */
 	static void makePopMove(int column) {
 		int row;
 		for(row=0;row<(numrows - 1);row++) {
@@ -53,7 +61,10 @@ public class TestPlayer {
 		gameboard[row][column] = 0;
 	}
 	
-	
+	/**
+	 * Takes our move represented by 2 numbers and makes it
+	 * @param ourMove the move to be made represented by two numbers
+	 */
 	static void Determine_and_move(int[] ourMove) {
 		//make move
 		if(ourMove[1] == 1){
@@ -66,6 +77,11 @@ public class TestPlayer {
 		
 	}
 	
+	/**
+	 * Main program driving the player
+	 * @param args
+	 * @throws IOException
+	 */
 	public static void main(String[] args) throws IOException {
 		System.out.println(TestPlayer.playerName);
 //		 fw.write(TestPlayer.playerName);

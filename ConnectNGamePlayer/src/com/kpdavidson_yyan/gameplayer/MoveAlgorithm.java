@@ -7,6 +7,11 @@ package com.kpdavidson_yyan.gameplayer;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * 
+ * @author Kyle & Yan
+ *
+ */
 public class MoveAlgorithm {
 	
 	static boolean completed = true;
