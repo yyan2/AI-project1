@@ -537,13 +537,37 @@ public class MoveAlgorithm {
 	}
 	
 	/**
-	 * A second method of heuristically evaluating the gameboard state
+	 * A second method of heuristically evaluating the gameboard state,
+	 *  Being surrounded by opponent pieces is a good thing
 	 * @param board the board to be evaluated
 	 * @return
 	 */
-	private static Double heuristicEvalTwo(int[][] board) {
+	private static Double heuristicEvalTwo(int[][] board, int player) {
 		Double result = 0.0;
+		int i,j,k,n;
 		
-		return result;
+		//for each board location
+		for(i=0;i<TestPlayer.numcolumns;i++) {
+			for(j=0;j<TestPlayer.numrows; j++) {
+
+				if(board[j][i] == player) {
+					for(k=(i-1);k<=(i+1);k++) {
+						for(n=(j-1);n<=(j+1);n++) {
+							if(k >= 0 && k < TestPlayer.numcolumns && n >= 0 && n < TestPlayer.numrows) {
+								if(board[n][k] == (player * -1)) {
+									result = result + 2;
+								}
+								else if(board[n][k] == player) {
+									result = result + 1;
+								}
+							}
+						}
+					}
+				}
+				
+			}
+		}
+		
+		return (result * player);
 	}
 }
