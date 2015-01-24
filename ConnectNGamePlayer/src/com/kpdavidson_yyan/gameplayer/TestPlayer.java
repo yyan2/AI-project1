@@ -29,8 +29,8 @@ public class TestPlayer {
 	static int numcolumns; //number of columns on the board
 	static int winlength; //number of pieces in a row to win
 	static long timelimit; //time dedicated to running computation
-	static boolean wePopped = false; //boolean ind
-	static boolean theyPopped = false;
+	static boolean wePopped = false; //boolean indicating that we have already used our pop move
+	static boolean theyPopped = false; //boolean indicating that the enemy has already used their pop
 
 	/**
 	 * Performs a drop on the board
