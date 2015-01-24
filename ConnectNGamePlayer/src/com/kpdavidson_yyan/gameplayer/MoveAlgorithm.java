@@ -186,6 +186,12 @@ public class MoveAlgorithm {
 		desiredMove.setValue(best.getValue());
 	}
 
+	
+	/**
+	 * Copy the board
+	 * @param gboard the board being copied
+	 * @param board the board that would be changed after this method returns
+	 */
 	private static void copyBoard(int[][] gboard, int[][] board) {
 		int i,j;
 		for(i=0;i<TestPlayer.numrows;i++) {
@@ -195,6 +201,12 @@ public class MoveAlgorithm {
 		}
 	}
 	
+	/**
+	 * Make a drop move to the board
+	 * @param player the player who makes this move
+	 * @param column the column that this move is made to
+	 * @param board the board that the move is made to
+	 */
 	static void makeDropMove(int player, int column, int[][] board) {
 		int row = 0;
 		
@@ -207,6 +219,11 @@ public class MoveAlgorithm {
 		}
 	}
 	
+	/**
+	 * Make a pop move to the board
+	 * @param column the column that the pop move is made to
+	 * @param board the board that the move is made to
+	 */
 	static void makePopMove(int column, int[][] board) {
 		int row;
 		for(row=0;row<(TestPlayer.numrows - 1);row++) {
@@ -215,6 +232,11 @@ public class MoveAlgorithm {
 		board[row][column] = 0;
 	}
 	
+	/**
+	 * Check to see if the game is over (win, lose or draw)
+	 * @param board the board that should be checked for game over status
+	 * @return true if the game is over (win, lose or draw)
+	 */
 	private static int gameOverCheck(int[][] board) {
 		int result = 10000;
 		boolean weWon = false;
@@ -225,9 +247,12 @@ public class MoveAlgorithm {
 		//vertical (column) Check
 		for(i = 0; i < TestPlayer.numcolumns; i++){
 			int count = 0;
-			for(j = TestPlayer.numrows - 1; j >= 0; j--){
+			for(j = TestPlayer.numrows - 1; j >= 0; j--){ 
+				//start checking from the top of the board, skip all empty spaces
 				if(board[j][i] == 0) continue;
 				count += board[j][i];
+				//if a winning condition is found, break the loop as there shouldn't be multiple
+				//winning conditions in a single column for both players
 				if(count == TestPlayer.winlength) {
 					weWon = true;
 					break;
@@ -244,34 +269,41 @@ public class MoveAlgorithm {
 			int count = board[i][0];
 			int player = board[i][0];
 			for(j = 1; j <= TestPlayer.numcolumns - 1; j++){
+				//reset the count number and player if empty space is met
 				if(board[i][j] == 0) {
 					count = 0;
 					player = 0;
 					continue;
 				}
-				else if(board[i][j] == player) count = count + board[i][j];
+				//increment count number if consecutive discs from the same player is found
+				else if(board[i][j] == player) count = count + board[i][j]; 
+				//reset count number and player if the opponent's disc is found
 				else if(board[i][j] != player) {
 					player = board[i][j];
 					count = board[i][j];
 				}
 				
+				//check for count number for each column and set winning/losing condition
 				if(count == TestPlayer.winlength) weWon = true;
 				else if(count == (-1 * TestPlayer.winlength)) weLost = true;
 			}
 		}
 		
 		//Diagonal (\) check
+		//start from the top row from left to right
 		for(i=0;i<=TestPlayer.numcolumns-1;i++){
 			int x = i, y = TestPlayer.numrows - 1;
 			int count = 0;
+			//keep checking bottom right direction while inside the board
 			while(x < TestPlayer.numcolumns && y >= 0){
-				if(board[y][x] == 0) count = 0;
-				else if(count == 0) count = board[y][x];
-				else if(board[y][x] == (count / Math.abs(count))) count += board[y][x];
-				else count = board[y][x];
+				if(board[y][x] == 0) count = 0;	//reset count if empty
+				else if(count == 0) count = board[y][x]; //set count if a disc is found
+				//increment count if consecutive discs are found
+				else if(board[y][x] == (count / Math.abs(count))) count += board[y][x]; 
+				else count = board[y][x]; //update count if opponent's disc is found
 				x++;
 				y--;
-				
+				//check for winning/losing condition
 				if(Math.abs(count) == TestPlayer.winlength) {
 					if(count > 0) weWon = true;
 					else if(count < 0) weLost = true;
@@ -279,6 +311,8 @@ public class MoveAlgorithm {
 			}
 			
 		}
+		//then start from the left column from up to down, skip the top-left space
+		//same algorithm as above
 		for(i = 0; i < TestPlayer.numrows - 1; i++){
 			int y = i, x = 0;
 			int count = 0;
@@ -298,23 +332,28 @@ public class MoveAlgorithm {
 		}
 		
 		//diagonal (/) check
+		//start from bottom column from left to right
 		for(i=0;i<=TestPlayer.numcolumns-1;i++){
 			int x = i, y = 0;
 			int count = 0;
+			//keep checking upper right direction while inside the board
 			while(x < TestPlayer.numcolumns && y < TestPlayer.numrows){
-				if(board[y][x] == 0) count = 0;
-				else if(count == 0) count = board[y][x];
+				if(board[y][x] == 0) count = 0;	//reset count if empty
+				else if(count == 0) count = board[y][x]; //set count if a disc is found
+				//increment count if consecutive discs are found
 				else if(board[y][x] == (count / Math.abs(count))) count += board[y][x];
-				else count = board[y][x];
+				else count = board[y][x];//update count if opponent's dics is found
 				x++;
 				y++;
-				
+				//check for winning/losing condition
 				if(Math.abs(count) == TestPlayer.winlength) {
 					if(count > 0) weWon = true;
 					else if(count < 0) weLost = true;
 				}
 			}
 		}
+		//then start from the left column from bottom to top, skip the bottom-left space
+		//same algorithm as above
 		for(i = 1; i < TestPlayer.numrows; i++){
 			int y = i, x = 0;
 			int count = 0;
@@ -357,6 +396,11 @@ public class MoveAlgorithm {
 	}
 	
 	
+	/**
+	 * Heuristic function for evaluating the current status of the board
+	 * @param board the board to be checked for
+	 * @return the evaluation value generated by the heuristic function
+	 */
 	private static Double heuristicEval(int[][] board) {
 		Double result = 0.0;
 		int threshold;
