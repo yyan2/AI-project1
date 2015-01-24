@@ -491,4 +491,15 @@ public class MoveAlgorithm {
 		
 		return result;
 	}
+	
+	/**
+	 * A second method of heuristically evaluating the gameboard state
+	 * @param board the board to be evaluated
+	 * @return
+	 */
+	private static Double heuristicEvalTwo(int[][] board) {
+		Double result = 0.0;
+		
+		return result;
+	}
 }
