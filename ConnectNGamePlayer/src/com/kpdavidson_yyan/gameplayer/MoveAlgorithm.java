@@ -14,10 +14,15 @@ import java.util.List;
  */
 public class MoveAlgorithm {
 	
-	static boolean completed = true;
-	static long begintime;
-	static int turns = 0;
+	static boolean completed = true; //boolean indicated whether or not the algorithm has completed its work for the last run
+	static long begintime; //the time that input was received from the Referee
+	static int turns = 0; //the number of turns that have passed in the game
 	
+	/**
+	 * Performs a DFS to the level specified
+	 * @param maxlevel determines how low the DFS will go before performing heuristic evaluations
+	 * @return An integer array representing the best calculated move
+	 */
 	public static int[] doBestMove(int maxlevel) {
 		
 		completed = true;
@@ -68,10 +73,17 @@ public class MoveAlgorithm {
 		return bestmove;
 	}
 	
-	
-	
-	
-
+	/**
+	 * A recursive move evaluation
+	 * @param desiredMove The move to be evaluated
+	 * @param gboard The gameboard as it is when the move is being evaluated
+	 * @param lastmoved The player who made "desiredMove" (1=us, -1=enemy)
+	 * @param level The depth of this evaluation in the DFS
+	 * @param weAlreadyPopped Boolean indicating that we have used our Pop already
+	 * @param theyAlreadyPopped Boolean indicating that enemy has used their Pop already
+	 * @param parentBest The current best value of the parent node (for Alpha-Beta pruning)
+	 * @param maxlevel How far down the DFS can go
+	 */
 	private static void EvaluateMove(MoveRecord desiredMove, int[][] gboard, int lastmoved, int level, boolean weAlreadyPopped,
 			boolean theyAlreadyPopped, Double parentBest, int maxlevel) {
 		int currentLevel = level + 1;
