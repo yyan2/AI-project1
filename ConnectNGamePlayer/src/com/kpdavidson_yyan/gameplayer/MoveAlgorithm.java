@@ -134,7 +134,7 @@ public class MoveAlgorithm {
 		//if we must stop perform heuristic
 		if(level == maxlevel) {
 //			Logger.log("Performing Heuristic at Level " + level);
-			desiredMove.setValue(heuristicEval(board));
+			desiredMove.setValue(heuristicEvalTwo(board, desiredMove.getPlayer(), 1, 2));
 			return;
 		}
 		

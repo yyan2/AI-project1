@@ -87,7 +87,7 @@ public class TestPlayer {
 		System.out.println(TestPlayer.playerName);
 //		 fw.write(TestPlayer.playerName);
 		
-		Logger.init();	//comment out if we no longer need it
+		//Logger.init();	//comment out if we no longer need it
 		
 		String str = input.readLine();		//throw out player name line
 		String[] players = str.split(" ");
