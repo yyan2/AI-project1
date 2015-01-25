@@ -542,7 +542,7 @@ public class MoveAlgorithm {
 	 * @param board the board to be evaluated
 	 * @return
 	 */
-	private static Double heuristicEvalTwo(int[][] board, int player) {
+	private static Double heuristicEvalTwo(int[][] board, int player, int valueofSame, int valueofEnemy) {
 		Double result = 0.0;
 		int i,j,k,n;
 		
@@ -555,10 +555,10 @@ public class MoveAlgorithm {
 						for(n=(j-1);n<=(j+1);n++) {
 							if(k >= 0 && k < TestPlayer.numcolumns && n >= 0 && n < TestPlayer.numrows) {
 								if(board[n][k] == (player * -1)) {
-									result = result + 2;
+									result = result + valueofEnemy;
 								}
 								else if(board[n][k] == player) {
-									result = result + 1;
+									result = result + valueofSame;
 								}
 							}
 						}
