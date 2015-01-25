@@ -31,6 +31,7 @@ public class TestPlayer {
 	static long timelimit; //time dedicated to running computation
 	static boolean wePopped = false; //boolean indicating that we have already used our pop move
 	static boolean theyPopped = false; //boolean indicating that the enemy has already used their pop
+	static int ourPlayerNumber = 0;
 
 	/**
 	 * Performs a drop on the board
@@ -89,6 +90,9 @@ public class TestPlayer {
 		Logger.init();	//comment out if we no longer need it
 		
 		String str = input.readLine();		//throw out player name line
+		String[] players = str.split(" ");
+		if(players[1].equals(TestPlayer.playerName)) ourPlayerNumber = 1;
+		else ourPlayerNumber = 2;
 		Logger.log(str);
 		str = input.readLine();				//read game config
 		Logger.log(str);
@@ -105,7 +109,7 @@ public class TestPlayer {
 		winlength = Integer.parseInt(gameConfig[2]);
 		timelimit = ((Integer.parseInt(gameConfig[4])) * 1000) / 4 * 3; //get 3/4 of the allowed time
 		
-		if(Integer.parseInt(gameConfig[3]) == 1) { //we start first
+		if(Integer.parseInt(gameConfig[3]) == ourPlayerNumber) { //we start first
 			//run getBestMove
 			int startlevel = 2;
 			
